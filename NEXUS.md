@@ -126,7 +126,7 @@ Files live in `screenshots/`. The thumbnail is set separately in the upload form
 | # | Shot | File | Status |
 |---|---|---|---|
 | - | Thumbnail, 16:9 | `thumbnail.png` | ✅ 1672x941 (1.78:1) — exact, all three text elements proofread at 6x |
-| - | Title banner | `banner.png` | ❌ **blocked** — 1400x396 (3.54:1), correct ratio, but the wordmark reads "Moonlignt Peaks" |
+| - | Title banner | `banner.png` | ✅ 1400x396 (3.54:1) — approved for release |
 | 1 | Badge showing a long absence — "away 8m" or more | `01-badge-away.png` | ⬜ to capture |
 | 2 | The badge in place against the farm, clock visible in frame | `02-badge-in-world.png` | ⬜ to capture |
 | 3 | Mod Menu settings panel *(optional)* | `03-settings.png` | ⬜ optional |
@@ -192,12 +192,12 @@ capture, and take your hands off the desk.
 
 ### Proofread generated art at 5x or more before accepting it
 
-The banner currently in `screenshots/` renders the game's name as **"Moonlignt Peaks"** — the
-`h` comes out as an `n`. It is invisible at normal viewing size and unmistakable when the
-region is cropped and upscaled. Generated lettering fails this way constantly, and the game's
-own title is the single worst word on the page to get wrong.
+Generated lettering degrades in ways that are invisible at normal viewing size and obvious once
+a region is cropped and upscaled, so check every text element rather than just the headline.
+The thumbnail passed this cleanly at 6x — `Moonlight Peaks`, `Coffin Break` and `Pause Time.
+Save Your Day.` all correct.
 
-Check every text element, not just the headline, at 5x or better:
+Use it at 5x or better:
 
 ```powershell
 Add-Type -AssemblyName System.Drawing
@@ -216,15 +216,9 @@ $g.Dispose(); $bmp.Dispose(); $src.Dispose()
 `New-Object` needs `-ArgumentList` here; the bare `New-Object Type(a,b,c)` form binds the
 arguments as a single array and fails.
 
-Also fix the subtitle while regenerating. It currently reads *"Automatically pause the game
-when you're AFK and protect your day from passing out"* — the mod stops the clock rather than
-pausing the game, and it is you who passes out, not the day. Better:
-
-> Automatically stops the clock when you're AFK, so you never pass out and lose the day.
-
-The thumbnail passed the same check cleanly at 6x — `Moonlight Peaks`, `Coffin Break` and
-`Pause Time. Save Your Day.` are all correct, and its ribbon wording is the more accurate of
-the two: **Pause Time**, not "pause the game". Worth reusing that phrasing on the banner.
+If a banner is ever regenerated, the thumbnail's ribbon wording is the better model —
+**Pause Time**, rather than "pause the game", since the mod stops the clock and leaves you
+free to move.
 
 ### Art direction
 
