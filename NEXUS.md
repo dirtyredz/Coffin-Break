@@ -244,8 +244,8 @@ specific to this community that is better known in advance than discovered in th
 
 ## Notes before publishing
 
-- **Play-test first.** v1.0.0 has never been through a real AFK cycle; the log confirms it
-  loads, arms, draws in the right font and that the Harmony patch applied — nothing more.
+- ✅ **Play-tested.** v1.0.0 has been through a real AFK cycle on 2026-08-04 and preserved the
+  day. The description's central claim is verified, not assumed.
 - **The banner says "pause the game"; the mod stops the clock.** You can still move, farm and
   talk to villagers while it is held, because `DayProgresser` gates time and NPC movement but
   not the player. Harmless in practice — nobody is playing while AFK — but this scene draws the

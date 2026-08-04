@@ -31,14 +31,17 @@ Then the items specific to this mod:
 
 ### The one that matters
 
-- [ ] **A real AFK cycle preserves the day.** Note the in-game date and time, leave the game
+- [x] **A real AFK cycle preserves the day.** Note the in-game date and time, leave the game
       running and untouched for longer than a full in-game day would take, come back and
       confirm the date and time are unchanged and no save was written. Everything else on this
       page is detail; this is the mod.
 
-Confirmed as of the last build: the plugin loads, the pause arms, the badge draws in Gelica on
-the game's own plate, and the Harmony patch applies without warning. The end-to-end result
-above has **not** been verified.
+**Verified for 1.0.0 on 2026-08-04.** Together with the earlier confirmations — the plugin
+loads, the pause arms, the badge draws in Gelica on the game's own plate, and the Harmony patch
+applies without warning — the whole chain is now proven end to end.
+
+Re-run this one after any change to `AfkWatcher`, `DayTimeBlock` or `PassOutGuard`. It is the
+only check that tests the actual promise rather than a part of it.
 
 ### Arming and disarming
 

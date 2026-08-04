@@ -2,13 +2,11 @@
 
 Stops the in-game clock when you walk away, so going AFK never costs you a day.
 
-**Status:** v1.0.0 — packaged for release, awaiting the end-to-end AFK test.
-See [RELEASING.md](RELEASING.md).
+**Status:** v1.0.0 — verified end to end, ready to publish. See [RELEASING.md](RELEASING.md).
 
-Confirmed working so far: the plugin loads, the pause arms, the badge draws in the game's own
-Gelica on the game's own plate, and the Harmony patch on `IsPassOutNeeded` applies without
-warning. Not yet confirmed: that a genuinely long absence preserves the day — the end-to-end
-result the mod exists for.
+Confirmed on 2026-08-04: the plugin loads, the pause arms, the badge draws in the game's own
+Gelica on the game's own plate, the Harmony patch on `IsPassOutNeeded` applies without warning,
+and **a real AFK cycle preserves the day** — the result the mod exists for.
 
 **Nexus title:** `Coffin Break - AFK Auto-Pause`
 
