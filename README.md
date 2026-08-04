@@ -179,7 +179,7 @@ Keyword searches for `afk` and `idle` return zero results. The gap is real.
 ## Build
 
 ```bash
-dotnet build "mods/CoffinBreak/src/CoffinBreak/CoffinBreak.csproj" -c Release
+dotnet build "src/CoffinBreak.csproj" -c Release
 ```
 
 Auto-deploys to `BepInEx/plugins/MoonlightPeaksMods/CoffinBreak/`.

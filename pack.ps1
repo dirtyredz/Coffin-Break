@@ -14,7 +14,7 @@
 $ErrorActionPreference = 'Stop'
 
 $modRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$project = Join-Path $modRoot 'src\CoffinBreak\CoffinBreak.csproj'
+$project = Join-Path $modRoot 'src\CoffinBreak.csproj'
 
 # This mod lives in two places: on its own as github.com/dirtyredz/Coffin-Break, and inside the
 # notes monorepo under mods/CoffinBreak. dist/ belongs at the repo root in both, so work out
@@ -32,7 +32,7 @@ if (-not $version) { throw "Could not read <Version> from $project" }
 
 # The csproj names the archive but BepInEx reports the attribute, so a mismatch ships an
 # archive that lies about its contents. Cheap to check, expensive to discover later.
-$pluginSource = Join-Path $modRoot 'src\CoffinBreak\Plugin.cs'
+$pluginSource = Join-Path $modRoot 'src\Plugin.cs'
 $declared = [regex]::Match(
     (Get-Content $pluginSource -Raw),
     'PluginVersion\s*=\s*"([^"]+)"').Groups[1].Value
@@ -46,7 +46,7 @@ Write-Host "Packing Coffin Break $version"
 dotnet build $project -c Release -p:SkipDeploy=true
 if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
 
-$dll = Join-Path $modRoot 'src\CoffinBreak\bin\Release\netstandard2.1\CoffinBreak.dll'
+$dll = Join-Path $modRoot 'src\bin\Release\netstandard2.1\CoffinBreak.dll'
 if (-not (Test-Path $dll)) { throw "Built DLL not found at $dll" }
 
 $staging = Join-Path $env:TEMP "CoffinBreak-pack-$([guid]::NewGuid().ToString('N'))"
