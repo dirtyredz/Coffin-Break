@@ -13,7 +13,8 @@ first, they still apply.
 | **Name** | Coffin Break - AFK Auto-Pause |
 | **Summary** (short, shows in listings) | Walk away without losing the day. The clock stops when you do, and starts again the moment you touch anything. |
 | **Category** | Gameplay — where Clock Pause and TimeControl both sit |
-| **Version** | 1.0.0 |
+| **Version** | 1.0.1 |
+| **Nexus page** | [mod 121](https://www.nexusmods.com/moonlightpeaks/mods/121) — live since 2026-08-04 |
 | **Requirements** | BepInEx 5 (win_x64) — required |
 | | Mod Menu — optional, for in-game settings |
 | **Tags** | quality of life, gameplay, save-safe, afk, idle |
@@ -106,6 +107,19 @@ behaviour.
 
 Player-facing. Describe the **symptom**, not the cause — the repo README names the Harmony
 patch and the blocker id; that belongs in the repo.
+
+### 1.0.1
+
+```
+Fixed
+- The "time paused" badge no longer appears while you are in a menu, in
+  decorate mode or browsing a chest. Time was already stopped on those
+  screens, so the badge had nothing to tell you.
+
+New settings
+- HideBadgeWhenAlreadyPaused - turn the above off if you would rather see
+  the badge whenever the mod is holding the clock.
+```
 
 ### 1.0.0
 

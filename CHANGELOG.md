@@ -6,7 +6,35 @@ patches, ids and the things that were tried and dropped.
 One entry per **released** version, not per build — see
 [12-versioning-and-release.md](https://github.com/dirtyredz/chest-labels/blob/main/12-versioning-and-release.md).
 
+## 1.0.1
+
+### Fixed
+
+- The badge announced "time paused" while sitting in a menu, where the clock was already
+  stopped by the game — telling the player something they could plainly see. `DayProgresser`
+  registers its blocker under `DayProgresser_dayProgressBlocker`, and `Blocker` keeps a static
+  registry keyed by that name, so `Blocker.Get(...).Ids` gives the live list of everyone
+  currently holding the clock. The badge now stays quiet whenever an id other than ours is in
+  it. Covers the pause menu, decorate mode, inventory and chest screens, and any other time
+  mod, without needing to know a single screen type.
+
+  Only the caption is suppressed — the hold itself is deliberately unconditional. Skipping the
+  hold would leave a frame where the menu closes, its blocker lifts and the clock runs while
+  the player is still away, which is the whole thing this mod prevents.
+
+### Added
+
+- `HideBadgeWhenAlreadyPaused` (default `true`) — switches the above off for anyone who wants
+  the badge whenever the mod is holding the clock, regardless of who else is.
+
+  Existing config files keep their values on upgrade and simply gain this key at its default;
+  see the config-upgrade notes in
+  [12-versioning-and-release.md](https://github.com/dirtyredz/chest-labels/blob/main/12-versioning-and-release.md).
+
 ## 1.0.0
+
+Published as [Nexus mod 121](https://www.nexusmods.com/moonlightpeaks/mods/121) on
+2026-08-04.
 
 First release. Built and iterated as `0.1.0` under the working name **AFK Guard**; renamed to
 **Coffin Break** before publishing and collapsed into this single entry.
@@ -45,17 +73,6 @@ First release. Built and iterated as `0.1.0` under the working name **AFK Guard*
   mid-cutscene can stall the scene rather than protect it.
 
 ### Fixed during development
-
-- The badge announced "time paused" while sitting in a menu, where the clock was already
-  stopped by the game — telling the player something they could plainly see. `DayProgresser`
-  registers its blocker under `DayProgresser_dayProgressBlocker`, and `Blocker` keeps a static
-  registry keyed by that name, so `Blocker.Get(...).Ids` gives the live list of everyone
-  currently holding the clock. The badge now stays quiet whenever an id other than ours is in
-  it (`HideBadgeWhenAlreadyPaused`).
-
-  Only the caption is suppressed — the hold itself is deliberately unconditional. Skipping the
-  hold would leave a frame where the menu closes, its blocker lifts and the clock runs while
-  the player is still away.
 
 - Badge font size was only re-applied when the caption text changed, so with
   `ShowPausedDuration` off a size edited in Mod Menu would never have taken effect.
