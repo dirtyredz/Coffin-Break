@@ -38,6 +38,7 @@ namespace CoffinBreak
         internal static ConfigEntry<bool> CountPlayerMovementAsActivity;
 
         internal static ConfigEntry<bool> ShowBadge;
+        internal static ConfigEntry<bool> HideBadgeWhenAlreadyPaused;
         internal static ConfigEntry<BadgeCorner> BadgePosition;
         internal static ConfigEntry<float> BadgeFontSize;
         internal static ConfigEntry<bool> ShowPausedDuration;
@@ -110,6 +111,15 @@ namespace CoffinBreak
                 "Indicator", "ShowBadge", true,
                 "Show a small badge while the clock is stopped. Without it there is no way to " +
                 "tell a stopped clock from a slow one, and you would not trust the mod.");
+
+            HideBadgeWhenAlreadyPaused = Config.Bind(
+                "Indicator", "HideBadgeWhenAlreadyPaused", true,
+                "Stay quiet when something else has already stopped the clock — the pause menu, " +
+                "decorate mode, an open inventory, or another time mod. The badge is there to " +
+                "tell you something you cannot otherwise see, and in a menu you can already see " +
+                "it.\n" +
+                "This only hides the badge. The clock stays held underneath, so closing the menu " +
+                "while you are still away does not hand you back a running clock.");
 
             BadgePosition = Config.Bind(
                 "Indicator", "BadgePosition", BadgeCorner.TopCentre,

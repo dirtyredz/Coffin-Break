@@ -131,6 +131,7 @@ signal of presence than any button.
 | `BlockPassOutWhilePaused` | `true` | Closes the end-of-day race |
 | `CountPlayerMovementAsActivity` | `true` | The controller safety net |
 | `ShowBadge` | `true` | |
+| `HideBadgeWhenAlreadyPaused` | `true` | Stay quiet in menus, where the clock is already stopped |
 | `BadgePosition` | `TopCentre` | Clear of the clock, toolbar and Detailed Minimap |
 | `BadgeFontSize` | `26` | |
 | `ShowPausedDuration` | `true` | How long you were gone |
@@ -145,6 +146,16 @@ the case that inherits nothing — so font, colour and shape are all set explici
 game's assets (`GameFonts`, `GamePalette`, `PanelSprite`, copied from ChestLabels). Sorting
 order 600, above Plant Peek's hover at 500, because a message about the clock being stopped
 is useless if something covers it.
+
+It stays quiet when someone else has already stopped the clock — a menu, decorate mode, an
+open inventory, another time mod. `DayProgresser` names its blocker
+`DayProgresser_dayProgressBlocker` and `Blocker` keeps a static registry keyed by that, so
+`Blocker.Get(...).Ids` is the live list of everyone holding the clock; any id but ours means
+the player can already see time is stopped and does not need telling.
+
+**The hold is not conditional, only the caption is.** Skipping the hold in a menu would leave
+a frame where the menu closes, its blocker lifts, and the clock runs while the player is still
+away — which is the entire thing this mod exists to prevent.
 
 ## Compatibility
 

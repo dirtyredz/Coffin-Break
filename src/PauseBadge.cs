@@ -34,9 +34,14 @@ namespace CoffinBreak
 
         private void Update()
         {
+            // Announcing "time paused" while the pause menu or an open inventory has already
+            // stopped the clock tells the player nothing they cannot see, so the badge stays
+            // quiet. The clock is still held underneath - only the caption is suppressed.
             var wanted = CoffinBreakPlugin.Enabled.Value &&
                          CoffinBreakPlugin.ShowBadge.Value &&
-                         AfkWatcher.IsPaused;
+                         AfkWatcher.IsPaused &&
+                         !(CoffinBreakPlugin.HideBadgeWhenAlreadyPaused.Value &&
+                           DayTimeBlock.IsHeldByAnyoneElse);
 
             if (!wanted)
             {
