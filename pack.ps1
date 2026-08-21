@@ -30,16 +30,6 @@ if ($parentName -eq 'mods') {
 $version = ([xml](Get-Content $project)).Project.PropertyGroup.Version | Where-Object { $_ }
 if (-not $version) { throw "Could not read <Version> from $project" }
 
-# The csproj names the archive but BepInEx reports the attribute, so a mismatch ships an
-# archive that lies about its contents. Cheap to check, expensive to discover later.
-$pluginSource = Join-Path $modRoot 'src\Plugin.cs'
-$declared = [regex]::Match(
-    (Get-Content $pluginSource -Raw),
-    'PluginVersion\s*=\s*"([^"]+)"').Groups[1].Value
-if ($declared -ne $version) {
-    throw "Version mismatch: csproj says $version, Plugin.cs says $declared"
-}
-
 Write-Host "Packing Coffin Break $version"
 
 # SkipDeploy keeps a release build from overwriting the copy under test in the game folder.

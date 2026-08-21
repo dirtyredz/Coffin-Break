@@ -16,8 +16,8 @@ powershell -File pack.ps1
 ```
 
 Produces `dist/CoffinBreak-<version>.zip`, reading the version from the csproj so the archive
-can never disagree with the DLL, and refusing to pack if `PluginVersion` in `Plugin.cs`
-disagrees with it.
+can never disagree with the DLL; `Plugin.cs` derives that same version at build time via
+`ModBuildInfo.Version`.
 
 There is no test project. This mod's behaviour is timers, window focus and a Harmony patch
 against live game state — none of which a headless runner can assert. The checklist below
@@ -65,7 +65,7 @@ save, and Serena's Grimoire had to warn users about exactly this with the old
 
 ### Housekeeping
 
-- [ ] `<Version>` and `PluginVersion` match — `pack.ps1` enforces this, but check the number
+- [ ] `<Version>` is the single source of truth — `Plugin.cs` derives from it via `ModBuildInfo.Version`, but check the number
       is the one you meant
 - [ ] CHANGELOG has one entry for this version
 - [ ] `VerboseLogging` defaults to `false`
