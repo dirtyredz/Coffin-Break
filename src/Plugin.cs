@@ -14,7 +14,7 @@ namespace CoffinBreak
         public const string PluginName = "Coffin Break";
         // Keep in step with <Version> in the csproj - pack.ps1 names the archive from the
         // csproj while BepInEx reports this one. See 12-versioning-and-release.md.
-        public const string PluginVersion = "1.0.1";
+        public const string PluginVersion = ModBuildInfo.Version;
 
         /// <summary>Where the paused badge sits on screen.</summary>
         public enum BadgeCorner
