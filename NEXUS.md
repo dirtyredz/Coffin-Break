@@ -1,5 +1,10 @@
 # Nexus Mod Page — Coffin Break
 
+> **Pasting into the upload form? Use [nexus-paste.md](nexus-paste.md), not this file.**
+> The copy here is wrapped for reading, and the editor turns every wrap into a `<br>`.
+> This mod's live page is the formatting reference for all six —
+> see [13-nexus-page-standard.md](../../13-nexus-page-standard.md).
+
 Draft copy for the Nexus listing. Same shape as
 [ChestLabels/NEXUS.md](https://github.com/dirtyredz/chest-labels/blob/main/mods/ChestLabels/NEXUS.md); read that one's notes on the upload form
 first, they still apply.
@@ -15,8 +20,9 @@ first, they still apply.
 | **Category** | Gameplay — where Clock Pause and TimeControl both sit |
 | **Version** | 1.0.1 |
 | **Nexus page** | [mod 121](https://www.nexusmods.com/moonlightpeaks/mods/121) — live since 2026-08-04 |
-| **Requirements** | BepInEx 5 (win_x64) — required |
-| | Mod Menu — optional, for in-game settings |
+| **Requirements** | BepInEx 5 (win_x64), 5.4.23.5 or newer — required |
+| | [Mod Nook](https://www.nexusmods.com/moonlightpeaks/mods/127) — optional, for in-game settings |
+| | Mod Menu — optional, the alternative to Mod Nook |
 | **Tags** | quality of life, gameplay, save-safe, afk, idle |
 | **Licence** | MIT (confirm before upload) |
 
@@ -45,10 +51,22 @@ written to your save.
 
 ### Installation instructions
 
+**With Vortex**
+
+Open the Files tab, click the Vortex button, and enable the mod. Done.
+
+**Manually**
+
 1. Install BepInEx 5 (win_x64) into your Moonlight Peaks folder, if you do not have it
-   already. The BepInEx folder should sit beside Moonlight Peaks.exe.
-2. Extract this mod into the same folder. It will land in BepInEx/plugins/CoffinBreak.
-3. Start the game.
+   already. The BepInEx folder sits beside Moonlight Peaks.exe.
+2. Launch the game once, then quit. This creates the BepInEx/plugins folder.
+3. Download the archive from the Files tab and extract it over your Moonlight Peaks folder,
+   so the file ends up at BepInEx/plugins/CoffinBreak/CoffinBreak.dll.
+4. Launch the game.
+
+Settings are written to a .cfg in BepInEx/config on first launch. With Mod Nook installed you
+never need to open it — every setting appears under Pause > Mod Nook and applies immediately,
+without a restart.
 
 To uninstall, delete the BepInEx/plugins/CoffinBreak folder. Your save is untouched, because
 nothing was ever written to it.
@@ -74,13 +92,19 @@ nothing was ever written to it.
 
 **Required**
 
-- BepInEx 5 (win_x64)
+- BepInEx 5 (win_x64), version 5.4.23.5 or newer
 
-**Optional**
+**Recommended companion**
 
-- Mod Menu — adds a Mods page to the pause menu so you can change this mod's settings in game.
-  Not needed; without it the settings live in a plain config file, and the defaults are meant
-  to be left alone.
+- **Mod Nook** — my in-game settings menu. This mod's timings are the sort of thing you want
+  to nudge and feel out rather than guess at once: set the idle delay on a slider and the
+  change applies the moment you close the menu. Not needed; without it the settings live in a
+  plain config file, and the defaults are meant to be left alone.
+  https://www.nexusmods.com/moonlightpeaks/mods/127
+- **Mod Menu** by Elsiabeth does the same job and is also supported. Mod Nook and Mod Menu can
+  both be installed — each adds its own button and neither interferes with the other.
+
+PC/Steam only. The Switch and mobile builds cannot load BepInEx.
 
 **Compatibility**
 
@@ -98,8 +122,9 @@ behaviour.
 - The **BepInEx** and **HarmonyX** teams, without whom none of this scene exists.
 - **cherrikei** for Clock Pause, which is where I confirmed the game's own day-time blocker was
   the right thing to build on rather than touching the clock directly.
-- **Elsiabeth** for Mod Menu, which is why this mod's settings are configurable in game without
-  it having to build a settings screen of its own.
+- **Elsiabeth** for Mod Menu, which made the case that in-game settings were worth having, and
+  which is why this mod never had to build a settings screen of its own.
+- **My Mate**, for being my inspiration.
 
 ---
 
