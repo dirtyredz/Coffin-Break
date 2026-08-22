@@ -13,7 +13,8 @@ All source is under `src/`. One responsibility per file:
 
 | File | Lines | Responsibility | Kind |
 |------|------:|----------------|------|
-| `Plugin.cs` | 170 | BepInEx entry point: binds all config, wires the Harmony patch + `AfkWatcher`, releases the clock on unload. Also declares the `BadgeCorner` enum and config section labels. | Own |
+| `Plugin.cs` | 49 | BepInEx entry point: calls `CoffinBreakConfig.Bind`, wires the Harmony patch + `AfkWatcher`, releases the clock on unload, owns the shared `Log`. Lifecycle/wiring only. | Own |
+| `CoffinBreakConfig.cs` | 143 | The configuration schema and bound values: all 13 `ConfigEntry` fields, the `BadgeCorner` enum, section labels, and `Bind(ConfigFile)`. Consumers depend on this, not on the entry class. | Own |
 | `AfkWatcher.cs` | 181 | The state machine — *idle in, active out*. A `MonoBehaviour` on the plugin's GameObject that arms/disarms the hold based on idle time, focus loss and cutscene state. Owns `IsPaused`. | Own |
 | `ActivityMonitor.cs` | 144 | Answers "did the player do anything this frame?" from legacy `UnityEngine.Input` plus character-movement fallback. Pure poller, no Unity component. | Own |
 | `DayTimeBlock.cs` | 106 | The **one** place that touches the game clock: adds/removes our id in `DayProgresser`'s `Blocker`, and reads whether anyone else holds it. Static facade over the game mechanism. | Own |
@@ -48,10 +49,11 @@ Runtime state flows **one way**: `ActivityMonitor` → `AfkWatcher` (decides) �
 `PauseBadge` (shows). `PassOutGuard` only *reads* `AfkWatcher.IsPaused`. No cycles. `Safe` is a leaf
 utility everyone may call.
 
-The one shape worth naming: every non-entry class reaches **back** to `CoffinBreakPlugin.<Entry>.Value`
-static config globals **and** `CoffinBreakPlugin.Log`. That is the standard BepInEx idiom, but it means
-both the config *schema* and the logger live in the entry class and everything depends on the entry
-point for them (see debt C1 and D2 below).
+The one shape worth naming: consumers read config from `CoffinBreakConfig.<Entry>.Value` (its own
+class since C1) but still reach **back** to `CoffinBreakPlugin.Log` for logging. The logger cannot move
+cleanly because the **vendored** `GameFonts` references `CoffinBreakPlugin.Log` and must stay
+verbatim-synced — so the residual entry-class dependency (debt D2) is gated on the vendored-trio fix
+(C2), not on this repo alone.
 
 ## Build & release
 
@@ -77,6 +79,11 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   uses `IsHeldByAnyoneElse`). Removed with its doc comment.
 - **M5 — `DayTimeBlock.BlockerId` tightened `internal` → `private`.** Referenced only inside
   `DayTimeBlock`; the exposure leaked implementation surface.
+- **C1 — Config schema extracted to `CoffinBreakConfig` (new `src/CoffinBreakConfig.cs`).** The 13
+  `ConfigEntry` fields, the `BadgeCorner` enum, the section labels and the ~90-line bind block moved out
+  of `Plugin.cs` (170 → 49 lines) into a dedicated schema class with `Bind(ConfigFile)`. Every consumer
+  now depends on `CoffinBreakConfig`, not on the entry point. `.cfg` section keys unchanged (no saved
+  values orphaned). Behaviour-preserving; build clean.
 - **A1 — Repeated `try/catch` guard shape named as `Safe` (new `src/Safe.cs`).** The "reach into a
   Unity/game API that might throw; fall back / log" shape now goes through `Safe.Get<T>` (silent
   fallback) / `Safe.Do` (logged) at **all eight** own-code sites — `ActivityMonitor` (3 input reads),
@@ -88,13 +95,6 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   in._
 
 **Open (backlogged):**
-
-- **C1 — Config schema lives in the entry class (P2).** All **13** `ConfigEntry` fields, the
-  `BadgeCorner` enum and the three `ModMenu.Section=` label constants sit in `Plugin.cs`; `Awake()` is
-  ~90 lines of `Config.Bind(...)`. "Bind the config schema" is a distinct responsibility from
-  "bootstrap the plugin," and extracting a `CoffinBreakConfig` static class would also flip every
-  consumer's dependency from *the concrete entry point* to *the config*. Deferred: 170-line file (well
-  under the ~800 cap), ubiquitous BepInEx idiom — churn/risk not yet worth it.
 
 - **C2 — Vendored visual trio duplicated across mods (P2, workspace-level).** `GameFonts`,
   `GamePalette`, `PanelSprite` are copied verbatim from ChestLabels with a manual "fix bugs in both
@@ -121,10 +121,12 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   `DayTimeBlock.IsHeld`; drop static `IsPaused`) would remove the triple-source-of-truth. Deferred:
   touches the arm/disarm path the mod's whole guarantee rests on — needs care, not a quick edit.
 
-- **D2 (M3) — Logging reaches back through the entry class (P2).** `CoffinBreakPlugin.Log` is read by
-  `DayTimeBlock`, `PassOutGuard`, `GameFonts`, etc., so even after C1 the composition-root dependency
-  on `CoffinBreakPlugin` remains. A neutral logging adapter initialised by `Plugin` (or logger
-  injection at setup boundaries) would close it. Pairs with C1.
+- **D2 (M3) — Logging reaches back through the entry class (P2, gated by C2).** With C1 done, the only
+  residual entry-class dependency is `CoffinBreakPlugin.Log`, read by `Safe`, `PassOutGuard`,
+  `AfkWatcher` — **and by the vendored `GameFonts`**. A neutral logging adapter can't fully replace
+  `CoffinBreakPlugin.Log` without either editing the vendored file (breaks verbatim-sync) or leaving a
+  shim, so D2 is **blocked on the C2 resolution** rather than independently actionable. Do it as part
+  of de-vendoring the trio.
 
 - **M4 — `PauseBadge` retains `canvas` as a field + a dead guard (P2).** `canvas` is only used inside
   `Build()`, so it can be a local; and the `if (!built) return;` immediately after `Build()`

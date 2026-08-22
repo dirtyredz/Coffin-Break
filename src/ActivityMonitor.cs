@@ -77,7 +77,7 @@ namespace CoffinBreak
             }
 
             if (!active &&
-                CoffinBreakPlugin.CountPlayerMovementAsActivity.Value &&
+                CoffinBreakConfig.CountPlayerMovementAsActivity.Value &&
                 PlayerMoved())
             {
                 LastReason = "character moved";

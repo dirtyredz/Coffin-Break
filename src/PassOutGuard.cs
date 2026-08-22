@@ -56,7 +56,7 @@ namespace CoffinBreak
                 return;
             }
 
-            if (!CoffinBreakPlugin.Enabled.Value || !CoffinBreakPlugin.BlockPassOutWhilePaused.Value)
+            if (!CoffinBreakConfig.Enabled.Value || !CoffinBreakConfig.BlockPassOutWhilePaused.Value)
             {
                 return;
             }
@@ -68,7 +68,7 @@ namespace CoffinBreak
 
             __result = false;
 
-            if (CoffinBreakPlugin.VerboseLogging.Value)
+            if (CoffinBreakConfig.VerboseLogging.Value)
             {
                 CoffinBreakPlugin.Log.LogInfo("Refused an end-of-day pass-out: you are away.");
             }

@@ -38,7 +38,7 @@ namespace CoffinBreak
 
         private void Update()
         {
-            if (!CoffinBreakPlugin.Enabled.Value)
+            if (!CoffinBreakConfig.Enabled.Value)
             {
                 if (armed)
                 {
@@ -71,14 +71,14 @@ namespace CoffinBreak
                 return;
             }
 
-            if (CoffinBreakPlugin.PauseOnFocusLoss.Value &&
-                unfocusedSeconds >= CoffinBreakPlugin.FocusLossGraceSeconds.Value)
+            if (CoffinBreakConfig.PauseOnFocusLoss.Value &&
+                unfocusedSeconds >= CoffinBreakConfig.FocusLossGraceSeconds.Value)
             {
                 Arm("window lost focus");
                 return;
             }
 
-            if (idleSeconds >= CoffinBreakPlugin.IdleSeconds.Value)
+            if (idleSeconds >= CoffinBreakConfig.IdleSeconds.Value)
             {
                 Arm($"idle for {idleSeconds:0}s");
             }
@@ -109,7 +109,7 @@ namespace CoffinBreak
         // instead. Both mean gone.
         private void OnApplicationPause(bool paused)
         {
-            if (paused && CoffinBreakPlugin.PauseOnFocusLoss.Value && !armed)
+            if (paused && CoffinBreakConfig.PauseOnFocusLoss.Value && !armed)
             {
                 Arm("application suspended");
             }
@@ -125,7 +125,7 @@ namespace CoffinBreak
             // Freezing the clock mid-cutscene can stall the scene rather than protect it: the
             // game's own scripted waits run on day progression. Stay out of the way and pick it
             // up on the next frame after the cutscene ends.
-            if (!CoffinBreakPlugin.PauseDuringCutscenes.Value && IsInCutscene())
+            if (!CoffinBreakConfig.PauseDuringCutscenes.Value && IsInCutscene())
             {
                 return;
             }
@@ -141,7 +141,7 @@ namespace CoffinBreak
             IsPaused = true;
             armedRealtime = Time.realtimeSinceStartup;
 
-            if (CoffinBreakPlugin.VerboseLogging.Value)
+            if (CoffinBreakConfig.VerboseLogging.Value)
             {
                 CoffinBreakPlugin.Log.LogInfo($"Clock stopped: {reason}.");
             }
@@ -160,7 +160,7 @@ namespace CoffinBreak
             IsPaused = false;
             DayTimeBlock.Release();
 
-            if (CoffinBreakPlugin.VerboseLogging.Value)
+            if (CoffinBreakConfig.VerboseLogging.Value)
             {
                 CoffinBreakPlugin.Log.LogInfo($"Clock restarted after {held:0}s: {reason}.");
             }

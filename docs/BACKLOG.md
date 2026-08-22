@@ -10,6 +10,10 @@ _None._ The mod is shipped, feature-complete, and the review found no P0/P1 stru
 _None._
 
 ## Done
+- **2026-08-22 — [C1]** extracted the config schema into `src/CoffinBreakConfig.cs` (`BadgeCorner`
+  enum + 13 entries + `Bind`); `Plugin.cs` 170 → 49 lines, consumers now depend on the config not the
+  entry point. Surfaced that **[D2] is blocked on [C2]** (vendored `GameFonts` pins
+  `CoffinBreakPlugin.Log`). Behaviour-preserving, build clean.
 - **2026-08-22 — [C4]** deleted dead `DayTimeBlock.IsClockStopped`.
 - **2026-08-22 — [M5]** tightened `DayTimeBlock.BlockerId` to `private`.
 - **2026-08-22 — [A1]** introduced `src/Safe.cs` (`Safe.Get`/`Safe.Do`) and routed all eight own-code
@@ -17,11 +21,6 @@ _None._
   `PassOutGuard.Apply`); `PlayerMoved` deliberately excepted. Behaviour-preserving, build clean.
 
 ## P2 — structural (from the 2026-08-22 review)
-
-- **[C1] Extract config schema out of `Plugin.cs`.** Move the 13 `ConfigEntry` fields, the
-  `BadgeCorner` enum and the section-label constants into a `CoffinBreakConfig` static class with a
-  `Bind(ConfigFile)`. Flips every consumer's dependency from the concrete entry point to the config.
-  Deferred: 170-line file, ubiquitous BepInEx idiom — low payoff for the churn.
 
 - **[C2] Kill the vendored-trio drift (workspace-level).** Replace verbatim copies of
   `GameFonts`/`GamePalette`/`PanelSprite` with a **linked shared source file** compiled into each mod's
@@ -40,9 +39,10 @@ _None._
   `AfkWatcher.IsPaused`, and `DayTimeBlock.held` all encode "are we holding the clock?". Pick one
   authority. Behaviour-sensitive (touches arm/disarm) — do with care and testing.
 
-- **[D2/M3] Decouple logging from the entry class.** `CoffinBreakPlugin.Log` is reached from several
-  files; a neutral logging adapter (or injected logger) removes the composition-root dependency that
-  survives C1. Pairs with C1.
+- **[D2/M3] Decouple logging from the entry class — BLOCKED ON C2.** After C1, the only residual
+  entry-class dependency is `CoffinBreakPlugin.Log`. It can't be cleanly replaced because the vendored
+  `GameFonts` references it and must stay verbatim-synced — so this rides along with de-vendoring the
+  trio (C2), not as a standalone task.
 
 - **[M4] `PauseBadge`: make `canvas` a local; decide on the unreachable `if (!built)` guard.** Kept for
   now as intentional defensiveness — revisit if `Build()` is ever made fallible.

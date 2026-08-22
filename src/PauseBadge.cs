@@ -37,10 +37,10 @@ namespace CoffinBreak
             // Announcing "time paused" while the pause menu or an open inventory has already
             // stopped the clock tells the player nothing they cannot see, so the badge stays
             // quiet. The clock is still held underneath - only the caption is suppressed.
-            var wanted = CoffinBreakPlugin.Enabled.Value &&
-                         CoffinBreakPlugin.ShowBadge.Value &&
+            var wanted = CoffinBreakConfig.Enabled.Value &&
+                         CoffinBreakConfig.ShowBadge.Value &&
                          AfkWatcher.IsPaused &&
-                         !(CoffinBreakPlugin.HideBadgeWhenAlreadyPaused.Value &&
+                         !(CoffinBreakConfig.HideBadgeWhenAlreadyPaused.Value &&
                            DayTimeBlock.IsHeldByAnyoneElse);
 
             if (!wanted)
@@ -68,10 +68,10 @@ namespace CoffinBreak
             // caption never changes, and a size edited in Mod Menu would otherwise never apply.
             var caption = Caption();
             if (caption != lastRendered ||
-                !Mathf.Approximately(lastFontSize, CoffinBreakPlugin.BadgeFontSize.Value))
+                !Mathf.Approximately(lastFontSize, CoffinBreakConfig.BadgeFontSize.Value))
             {
                 lastRendered = caption;
-                lastFontSize = CoffinBreakPlugin.BadgeFontSize.Value;
+                lastFontSize = CoffinBreakConfig.BadgeFontSize.Value;
                 text.text = caption;
                 Resize();
             }
@@ -79,7 +79,7 @@ namespace CoffinBreak
 
         private string Caption()
         {
-            if (!CoffinBreakPlugin.ShowPausedDuration.Value || watcher == null)
+            if (!CoffinBreakConfig.ShowPausedDuration.Value || watcher == null)
             {
                 return "Time paused — away";
             }
@@ -148,7 +148,7 @@ namespace CoffinBreak
 
         private void Resize()
         {
-            text.fontSize = CoffinBreakPlugin.BadgeFontSize.Value;
+            text.fontSize = CoffinBreakConfig.BadgeFontSize.Value;
             text.ForceMeshUpdate();
 
             var size = text.GetPreferredValues();
@@ -166,25 +166,25 @@ namespace CoffinBreak
 
             const float margin = 32f;
 
-            switch (CoffinBreakPlugin.BadgePosition.Value)
+            switch (CoffinBreakConfig.BadgePosition.Value)
             {
-                case CoffinBreakPlugin.BadgeCorner.TopLeft:
+                case CoffinBreakConfig.BadgeCorner.TopLeft:
                     anchor = new Vector2(0f, 1f);
                     offset = new Vector2(margin, -margin);
                     break;
-                case CoffinBreakPlugin.BadgeCorner.TopRight:
+                case CoffinBreakConfig.BadgeCorner.TopRight:
                     anchor = new Vector2(1f, 1f);
                     offset = new Vector2(-margin, -margin);
                     break;
-                case CoffinBreakPlugin.BadgeCorner.BottomLeft:
+                case CoffinBreakConfig.BadgeCorner.BottomLeft:
                     anchor = new Vector2(0f, 0f);
                     offset = new Vector2(margin, margin);
                     break;
-                case CoffinBreakPlugin.BadgeCorner.BottomRight:
+                case CoffinBreakConfig.BadgeCorner.BottomRight:
                     anchor = new Vector2(1f, 0f);
                     offset = new Vector2(-margin, margin);
                     break;
-                case CoffinBreakPlugin.BadgeCorner.BottomCentre:
+                case CoffinBreakConfig.BadgeCorner.BottomCentre:
                     anchor = new Vector2(0.5f, 0f);
                     offset = new Vector2(0f, margin);
                     break;
