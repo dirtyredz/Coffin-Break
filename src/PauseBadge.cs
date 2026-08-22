@@ -39,7 +39,7 @@ namespace CoffinBreak
             // quiet. The clock is still held underneath - only the caption is suppressed.
             var wanted = CoffinBreakConfig.Enabled.Value &&
                          CoffinBreakConfig.ShowBadge.Value &&
-                         AfkWatcher.IsPaused &&
+                         watcher != null && watcher.IsArmed &&
                          !(CoffinBreakConfig.HideBadgeWhenAlreadyPaused.Value &&
                            DayTimeBlock.IsHeldByAnyoneElse);
 

@@ -19,8 +19,15 @@ namespace CoffinBreak
 
         private PauseBadge badge;
 
-        /// <summary>True while this mod is holding the clock. Read by <see cref="PassOutGuard"/>.</summary>
-        internal static bool IsPaused { get; private set; }
+        /// <summary>
+        /// True while this watcher's AFK session is armed. Read by its own <see cref="PauseBadge"/>
+        /// so the badge reflects <em>this</em> watcher's away-state (paired with
+        /// <see cref="PausedSeconds"/>). This is watcher/session state, not the clock authority:
+        /// whether our blocker is actually registered is <see cref="DayTimeBlock.IsHeld"/>. The two
+        /// coincide during the normal arm/disarm flow but are not the same fact — plugin teardown
+        /// (<c>CoffinBreakPlugin.OnDestroy</c>) can release the clock independently of this flag.
+        /// </summary>
+        internal bool IsArmed => armed;
 
         /// <summary>Real seconds the clock has been stopped by this mod. Drives the badge.</summary>
         internal float PausedSeconds => armed ? Time.realtimeSinceStartup - armedRealtime : 0f;
@@ -138,7 +145,6 @@ namespace CoffinBreak
             }
 
             armed = true;
-            IsPaused = true;
             armedRealtime = Time.realtimeSinceStartup;
 
             if (CoffinBreakConfig.VerboseLogging.Value)
@@ -157,7 +163,6 @@ namespace CoffinBreak
             var held = PausedSeconds;
 
             armed = false;
-            IsPaused = false;
             DayTimeBlock.Release();
 
             if (CoffinBreakConfig.VerboseLogging.Value)

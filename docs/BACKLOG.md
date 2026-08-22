@@ -10,6 +10,14 @@ _None._ The mod is shipped, feature-complete, and the review found no P0/P1 stru
 _None._
 
 ## Done
+- **2026-08-22 — [D1/M2]** collapsed the triple pause-ownership state. Deleted the redundant static
+  mirror `AfkWatcher.IsPaused`; `DayTimeBlock.IsHeld` is now the single authority on whether the clock
+  is held (`PassOutGuard` reads it). `PauseBadge` reads the new instance property `AfkWatcher.IsArmed`
+  — the distinct "is this watcher's session armed" question, which diverges from `IsHeld` only at
+  plugin teardown. `armed` is now fully private to the watcher. Arm/disarm control flow untouched, so
+  behaviour is identical. Build clean. (Approach A of two; the fuller "drop `armed` too" variant was
+  rejected as needless risk. Codex sign-off confirmed keeping watcher-scoped `IsArmed` over collapsing
+  the badge onto `IsHeld`.)
 - **2026-08-22 — [C1]** extracted the config schema into `src/CoffinBreakConfig.cs` (`BadgeCorner`
   enum + 13 entries + `Bind`); `Plugin.cs` 170 → 49 lines, consumers now depend on the config not the
   entry point. Surfaced that **[D2] is blocked on [C2]** (vendored `GameFonts` pins
@@ -34,10 +42,6 @@ _None._
 - **[M1] `PanelSprite` should reference `GamePalette` instead of re-inlining purple/rim literals.**
   Cheap, but **coordinated**: must land in both vendored copies together. (Also removes the reason two
   palette fields read as unused under C3.)
-
-- **[D1/M2] Collapse the triple pause-ownership state.** `AfkWatcher.armed`, static
-  `AfkWatcher.IsPaused`, and `DayTimeBlock.held` all encode "are we holding the clock?". Pick one
-  authority. Behaviour-sensitive (touches arm/disarm) — do with care and testing.
 
 - **[D2/M3] Decouple logging from the entry class — BLOCKED ON C2.** After C1, the only residual
   entry-class dependency is `CoffinBreakPlugin.Log`. It can't be cleanly replaced because the vendored

@@ -15,7 +15,7 @@ All source is under `src/`. One responsibility per file:
 |------|------:|----------------|------|
 | `Plugin.cs` | 49 | BepInEx entry point: calls `CoffinBreakConfig.Bind`, wires the Harmony patch + `AfkWatcher`, releases the clock on unload, owns the shared `Log`. Lifecycle/wiring only. | Own |
 | `CoffinBreakConfig.cs` | 143 | The configuration schema and bound values: all 13 `ConfigEntry` fields, the `BadgeCorner` enum, section labels, and `Bind(ConfigFile)`. Consumers depend on this, not on the entry class. | Own |
-| `AfkWatcher.cs` | 171 | The state machine — *idle in, active out*. A `MonoBehaviour` on the plugin's GameObject that arms/disarms the hold based on idle time, focus loss and cutscene state. Owns `IsPaused`. | Own |
+| `AfkWatcher.cs` | 176 | The state machine — *idle in, active out*. A `MonoBehaviour` on the plugin's GameObject that arms/disarms the hold based on idle time, focus loss and cutscene state. Exposes `IsArmed` (this watcher's session state) to its own badge; the authority on whether the clock is held is `DayTimeBlock.IsHeld`. | Own |
 | `ActivityMonitor.cs` | 144 | Answers "did the player do anything this frame?" from legacy `UnityEngine.Input` plus character-movement fallback. Pure poller, no Unity component. | Own |
 | `DayTimeBlock.cs` | 108 | The **one** place that touches the game clock: adds/removes our id in `DayProgresser`'s `Blocker`, and reads whether anyone else holds it. Static facade over the game mechanism. | Own |
 | `Safe.cs` | 54 | Cross-cutting guard helper: `Safe.Get`/`Safe.Do` run a Unity/game call that might throw, turning a throw into a fallback (or a logged warning). Names the guard shape once for the mod's own code. | Own |
@@ -33,11 +33,11 @@ say "fix bugs in both copies." See [Structural debt](#structural-debt) and
 
 ```
 Plugin (entry, wiring)  ── Awake ──▶ CoffinBreakConfig.Bind   (the config schema; everyone reads it)
-  ├─ PassOutGuard.Apply(harmony)        → reads AfkWatcher.IsPaused + config
+  ├─ PassOutGuard.Apply(harmony)        → reads DayTimeBlock.IsHeld + config
   ├─ AddComponent<AfkWatcher>()
   │     ├─ new ActivityMonitor()        → reads config
   │     ├─ DayTimeBlock.Hold/Release    → the only clock toucher
-  │     └─ AddComponent<PauseBadge>()   → reads AfkWatcher.PausedSeconds/IsPaused + DayTimeBlock + config
+  │     └─ AddComponent<PauseBadge>()   → reads AfkWatcher.PausedSeconds/IsArmed + DayTimeBlock + config
   │            └─ GameFonts / GamePalette / PanelSprite   (vendored visual trio)
   └─ OnDestroy → DayTimeBlock.Release() + UnpatchSelf()
 
@@ -46,8 +46,8 @@ Cross-cutting: ActivityMonitor / DayTimeBlock / AfkWatcher / PassOutGuard → Sa
 ```
 
 Runtime state flows **one way**: `ActivityMonitor` → `AfkWatcher` (decides) → `DayTimeBlock` (acts) /
-`PauseBadge` (shows). `PassOutGuard` only *reads* `AfkWatcher.IsPaused`. No cycles. `Safe` is a leaf
-utility everyone may call.
+`PauseBadge` (shows). `PassOutGuard` only *reads* `DayTimeBlock.IsHeld` (the single authority on
+whether the clock is held). No cycles. `Safe` is a leaf utility everyone may call.
 
 The one shape worth naming: consumers read config from `CoffinBreakConfig.<Entry>.Value` (its own
 class since C1) but still reach **back** to `CoffinBreakPlugin.Log` for logging. The logger cannot move
@@ -84,6 +84,19 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   of `Plugin.cs` (170 → 49 lines) into a dedicated schema class with `Bind(ConfigFile)`. Every consumer
   now depends on `CoffinBreakConfig`, not on the entry point. `.cfg` section keys unchanged (no saved
   values orphaned). Behaviour-preserving; build clean.
+- **D1 (M2) — Triple pause-ownership state collapsed.** `AfkWatcher.armed`, the static
+  `AfkWatcher.IsPaused`, and `DayTimeBlock.held` all encoded "are we holding the clock?". The
+  redundant static mirror `AfkWatcher.IsPaused` is deleted; `DayTimeBlock.IsHeld` is now the **single
+  authority** on whether the clock is held — `PassOutGuard` reads it directly. `PauseBadge` reads the
+  new instance property `AfkWatcher.IsArmed` from its bound watcher — a deliberately *distinct*
+  question ("is this watcher's AFK session armed", paired with `PausedSeconds`), which coincides with
+  `IsHeld` during normal arm/disarm but not at plugin teardown (`OnDestroy` releases the clock
+  independently of the watcher). `armed` is now fully **private** to the watcher. The arm/disarm
+  control flow is untouched, so behaviour is identical. Build clean. _(Approach A of two; the fuller
+  variant — dropping `armed` too and driving the loop off `IsHeld` — was rejected as needless risk to
+  the critical path. The Codex sign-off confirmed keeping the watcher-scoped `IsArmed` over collapsing
+  the badge onto `IsHeld`, since the two facts diverge at teardown.)_
+
 - **A1 — Repeated `try/catch` guard shape named as `Safe` (new `src/Safe.cs`).** The "reach into a
   Unity/game API that might throw; fall back / log" shape now goes through `Safe.Get<T>` (silent
   fallback) / `Safe.Do` (logged) at **all eight** own-code sites — `ActivityMonitor` (3 input reads),
@@ -114,12 +127,6 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   instead of referencing them, defeating the palette's "colours in one place" boundary (and this is
   why those two palette fields read as unused under C3). Fix is cheap but must land in **both** vendored
   copies together to preserve the verbatim-sync invariant — hence coordinated, not a unilateral edit.
-
-- **D1 (M2) — Pause ownership represented three ways (P2, behaviour-sensitive).** `AfkWatcher.armed`,
-  the static `AfkWatcher.IsPaused`, and `DayTimeBlock.held` all encode "are we holding the clock?".
-  Consolidating to one authority (badge reads an instance property; `PassOutGuard` reads
-  `DayTimeBlock.IsHeld`; drop static `IsPaused`) would remove the triple-source-of-truth. Deferred:
-  touches the arm/disarm path the mod's whole guarantee rests on — needs care, not a quick edit.
 
 - **D2 (M3) — Logging reaches back through the entry class (P2, gated by C2).** With C1 done, the only
   residual entry-class dependency is `CoffinBreakPlugin.Log`, read by `Safe`, `PassOutGuard`,

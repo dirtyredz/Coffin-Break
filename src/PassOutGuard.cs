@@ -61,7 +61,7 @@ namespace CoffinBreak
                 return;
             }
 
-            if (!AfkWatcher.IsPaused)
+            if (!DayTimeBlock.IsHeld)
             {
                 return;
             }
