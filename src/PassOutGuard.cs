@@ -1,4 +1,3 @@
-using System;
 using System.Reflection;
 using HarmonyLib;
 
@@ -25,7 +24,9 @@ namespace CoffinBreak
     {
         internal static void Apply(Harmony harmony)
         {
-            try
+            // A failed patch must not stop the mod loading: the clock blocker is the primary
+            // protection and works without this, so Safe.Do logs and swallows any throw.
+            Safe.Do(() =>
             {
                 var property = AccessTools.Property(typeof(GameDefaultState), "IsPassOutNeeded");
                 var getter = property?.GetGetMethod(nonPublic: true);
@@ -45,13 +46,7 @@ namespace CoffinBreak
                         typeof(PassOutGuard).GetMethod(
                             nameof(RefusePassOutWhilePaused),
                             BindingFlags.Static | BindingFlags.NonPublic)));
-            }
-            catch (Exception e)
-            {
-                // A failed patch must not stop the mod loading: the clock blocker is the primary
-                // protection and works without this.
-                CoffinBreakPlugin.Log.LogWarning($"End-of-day guard could not be applied: {e.Message}");
-            }
+            }, "End-of-day guard could not be applied");
         }
 
         private static void RefusePassOutWhilePaused(ref bool __result)

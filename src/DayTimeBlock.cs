@@ -40,10 +40,12 @@ namespace CoffinBreak
         /// does not gate <see cref="Hold"/>: staying held means that when the menu closes there
         /// is no frame in which the clock is free while the player is still away.
         /// </summary>
-        internal static bool IsHeldByAnyoneElse => Safe.Get(() =>
+        // Never let this cosmetic question break the badge, let alone the Update loop: Safe.Get
+        // returns false on any throw.
+        internal static bool IsHeldByAnyoneElse => Safe.Get(HeldByAnotherId, false);
+
+        private static bool HeldByAnotherId()
         {
-            // Never let this cosmetic question break the badge, let alone the Update loop:
-            // Safe.Get returns false on any throw.
             var blocker = Blocker.Get(GameBlockerId);
             if (blocker == null)
             {
@@ -59,7 +61,7 @@ namespace CoffinBreak
             }
 
             return false;
-        }, false);
+        }
 
         internal static void Hold()
         {

@@ -3,13 +3,16 @@ using System;
 namespace CoffinBreak
 {
     /// <summary>
-    /// Runs a call that reaches into Unity or the game and might throw, turning the throw into a
+    /// Runs work that reaches into Unity or the game and might throw, turning the throw into a
     /// quiet fallback (or a logged warning) rather than letting it take the caller down.
     ///
     /// Unity throws instead of returning a default when a platform lacks a device, and the game's
-    /// singletons can be absent before the game is up — so a bare call in the per-frame Update loop
-    /// or a badge redraw is a latent crash. Every such call in this mod's own code goes through
-    /// here; the vendored files (GameFonts et al.) keep their own guards to stay verbatim-synced.
+    /// singletons can be absent before the game is up — so a bare call in the per-frame Update loop,
+    /// a badge redraw, or the one-shot Harmony patch is a latent crash. Every such site in this
+    /// mod's own code goes through here, the sole exception being
+    /// <c>ActivityMonitor.PlayerMoved</c> (its catch mutates state, which neither overload can
+    /// express). The vendored files (GameFonts et al.) keep their own guards to stay
+    /// verbatim-synced.
     /// </summary>
     internal static class Safe
     {

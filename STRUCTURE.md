@@ -39,10 +39,14 @@ Plugin (entry, config, wiring)
   │     └─ AddComponent<PauseBadge>()   → reads AfkWatcher.PausedSeconds/IsPaused + DayTimeBlock + config
   │            └─ GameFonts / GamePalette / PanelSprite   (vendored visual trio)
   └─ OnDestroy → DayTimeBlock.Release() + UnpatchSelf()
+
+Cross-cutting: ActivityMonitor / DayTimeBlock / AfkWatcher / PassOutGuard → Safe (throw-guard)
+                                                                            └→ CoffinBreakPlugin.Log
 ```
 
 Runtime state flows **one way**: `ActivityMonitor` → `AfkWatcher` (decides) → `DayTimeBlock` (acts) /
-`PauseBadge` (shows). `PassOutGuard` only *reads* `AfkWatcher.IsPaused`. No cycles.
+`PauseBadge` (shows). `PassOutGuard` only *reads* `AfkWatcher.IsPaused`. No cycles. `Safe` is a leaf
+utility everyone may call.
 
 The one shape worth naming: every non-entry class reaches **back** to `CoffinBreakPlugin.<Entry>.Value`
 static config globals **and** `CoffinBreakPlugin.Log`. That is the standard BepInEx idiom, but it means
@@ -73,11 +77,15 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   uses `IsHeldByAnyoneElse`). Removed with its doc comment.
 - **M5 — `DayTimeBlock.BlockerId` tightened `internal` → `private`.** Referenced only inside
   `DayTimeBlock`; the exposure leaked implementation surface.
-- **A1 — Repeated `try/catch` guard shape named as `Safe` (new `src/Safe.cs`).** The "call a
-  Unity/game API that might throw; fall back / log" shape (six own-code sites across `ActivityMonitor`
-  and `DayTimeBlock`) now goes through `Safe.Get<T>` (silent fallback) / `Safe.Do` (logged). Vendored
-  files keep their own guards to stay verbatim-synced. Behaviour-preserving; `PlayerMoved`'s bespoke
-  guard (mutates state in the catch) was deliberately left inline.
+- **A1 — Repeated `try/catch` guard shape named as `Safe` (new `src/Safe.cs`).** The "reach into a
+  Unity/game API that might throw; fall back / log" shape now goes through `Safe.Get<T>` (silent
+  fallback) / `Safe.Do` (logged) at **all eight** own-code sites — `ActivityMonitor` (3 input reads),
+  `DayTimeBlock` (`IsHeldByAnyoneElse`, `Hold`, `Release`), `AfkWatcher.IsInCutscene`, and the one-shot
+  `PassOutGuard.Apply`. The **sole** exception is `ActivityMonitor.PlayerMoved` (its catch mutates
+  state, which neither overload can express). Vendored files keep their own guards to stay
+  verbatim-synced. Behaviour-preserving (identical fallbacks + log format); build clean. _The review
+  first shipped six sites; its own change-review caught `IsInCutscene` + `Apply` and they were folded
+  in._
 
 **Open (backlogged):**
 

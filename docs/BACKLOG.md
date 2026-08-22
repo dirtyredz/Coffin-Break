@@ -12,8 +12,9 @@ _None._
 ## Done
 - **2026-08-22 — [C4]** deleted dead `DayTimeBlock.IsClockStopped`.
 - **2026-08-22 — [M5]** tightened `DayTimeBlock.BlockerId` to `private`.
-- **2026-08-22 — [A1]** introduced `src/Safe.cs` (`Safe.Get`/`Safe.Do`) and routed the six own-code
-  try/catch guard sites through it; behaviour-preserving, build clean.
+- **2026-08-22 — [A1]** introduced `src/Safe.cs` (`Safe.Get`/`Safe.Do`) and routed all eight own-code
+  try/catch guard sites through it (`ActivityMonitor` ×3, `DayTimeBlock` ×3, `AfkWatcher.IsInCutscene`,
+  `PassOutGuard.Apply`); `PlayerMoved` deliberately excepted. Behaviour-preserving, build clean.
 
 ## P2 — structural (from the 2026-08-22 review)
 

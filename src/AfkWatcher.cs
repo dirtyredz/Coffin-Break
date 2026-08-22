@@ -166,16 +166,6 @@ namespace CoffinBreak
             }
         }
 
-        private static bool IsInCutscene()
-        {
-            try
-            {
-                return Cutscene.IsInCutscene;
-            }
-            catch (System.Exception)
-            {
-                return false;
-            }
-        }
+        private static bool IsInCutscene() => Safe.Get(() => Cutscene.IsInCutscene, false);
     }
 }
