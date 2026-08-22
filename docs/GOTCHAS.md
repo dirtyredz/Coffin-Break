@@ -24,9 +24,10 @@ Non-obvious traps. Read before changing the flagged areas.
   time — another mod slowing/stopping game time would otherwise corrupt the idle count.
 
 - **External calls are wrapped on purpose.** Unity throws (not returns default) when a platform lacks a
-  device, and singletons can be absent before the game is up. The `try/catch` guards in
-  `ActivityMonitor`/`DayTimeBlock` are load-bearing: a throwing idle check would take the whole `Update`
-  loop down. Keep the guard if you refactor them (see STRUCTURE.md debt A1).
+  device, and singletons can be absent before the game is up. The mod's own code routes these calls
+  through `Safe.Get`/`Safe.Do` (`src/Safe.cs`); a throwing idle check would otherwise take the whole
+  `Update` loop down. `ActivityMonitor.PlayerMoved` keeps a bespoke inline guard (it mutates
+  `hasPlayerPosition` in the catch) — don't fold it into `Safe`. Vendored files keep their own guards.
 
 - **Always release the blocker on teardown.** `Plugin.OnDestroy` → `DayTimeBlock.Release()`. Leaving a
   blocker behind freezes the player's clock permanently — the failure mode the old "Time Freeze

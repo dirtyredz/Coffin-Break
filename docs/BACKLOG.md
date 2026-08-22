@@ -9,6 +9,12 @@ _None._ The mod is shipped, feature-complete, and the review found no P0/P1 stru
 ## P1
 _None._
 
+## Done
+- **2026-08-22 — [C4]** deleted dead `DayTimeBlock.IsClockStopped`.
+- **2026-08-22 — [M5]** tightened `DayTimeBlock.BlockerId` to `private`.
+- **2026-08-22 — [A1]** introduced `src/Safe.cs` (`Safe.Get`/`Safe.Do`) and routed the six own-code
+  try/catch guard sites through it; behaviour-preserving, build clean.
+
 ## P2 — structural (from the 2026-08-22 review)
 
 - **[C1] Extract config schema out of `Plugin.cs`.** Move the 13 `ConfigEntry` fields, the
@@ -28,10 +34,6 @@ _None._
 - **[M1] `PanelSprite` should reference `GamePalette` instead of re-inlining purple/rim literals.**
   Cheap, but **coordinated**: must land in both vendored copies together. (Also removes the reason two
   palette fields read as unused under C3.)
-
-- **[A1] Introduce a thin `Safe` guard helper.** Name the repeated "call external API; on throw return
-  fallback / log warning" shape used 6+ times across `ActivityMonitor` and `DayTimeBlock`. Two
-  overloads (silent `Get<T>`, logging `Do`), not one — sites differ in whether they log.
 
 - **[D1/M2] Collapse the triple pause-ownership state.** `AfkWatcher.armed`, static
   `AfkWatcher.IsPaused`, and `DayTimeBlock.held` all encode "are we holding the clock?". Pick one

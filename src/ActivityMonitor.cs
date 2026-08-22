@@ -129,43 +129,16 @@ namespace CoffinBreak
             return moved;
         }
 
-        // Unity throws rather than returns a default when a platform lacks a device, and a
-        // throwing idle check would take the whole Update loop down with it.
+        // A throwing idle check would take the whole Update loop down, so every raw input read
+        // goes through Safe.Get (see Safe.cs) and falls back to "nothing happened" on any throw.
 
-        private static bool SafeAnyKey()
-        {
-            try
-            {
-                return UnityEngine.Input.anyKey;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+        private static bool SafeAnyKey() =>
+            Safe.Get(() => UnityEngine.Input.anyKey, false);
 
-        private static Vector3 SafeMousePosition()
-        {
-            try
-            {
-                return UnityEngine.Input.mousePosition;
-            }
-            catch (Exception)
-            {
-                return Vector3.zero;
-            }
-        }
+        private static Vector3 SafeMousePosition() =>
+            Safe.Get(() => UnityEngine.Input.mousePosition, Vector3.zero);
 
-        private static bool SafeScrolled()
-        {
-            try
-            {
-                return Mathf.Abs(UnityEngine.Input.mouseScrollDelta.y) > 0.01f;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
+        private static bool SafeScrolled() =>
+            Safe.Get(() => Mathf.Abs(UnityEngine.Input.mouseScrollDelta.y) > 0.01f, false);
     }
 }

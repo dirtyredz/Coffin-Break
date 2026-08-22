@@ -15,8 +15,9 @@ All source is under `src/`. One responsibility per file:
 |------|------:|----------------|------|
 | `Plugin.cs` | 170 | BepInEx entry point: binds all config, wires the Harmony patch + `AfkWatcher`, releases the clock on unload. Also declares the `BadgeCorner` enum and config section labels. | Own |
 | `AfkWatcher.cs` | 181 | The state machine — *idle in, active out*. A `MonoBehaviour` on the plugin's GameObject that arms/disarms the hold based on idle time, focus loss and cutscene state. Owns `IsPaused`. | Own |
-| `ActivityMonitor.cs` | 171 | Answers "did the player do anything this frame?" from legacy `UnityEngine.Input` plus character-movement fallback. Pure poller, no Unity component. | Own |
-| `DayTimeBlock.cs` | 124 | The **one** place that touches the game clock: adds/removes our id in `DayProgresser`'s `Blocker`, and reads whether anyone else holds it. Static facade over the game mechanism. | Own |
+| `ActivityMonitor.cs` | 144 | Answers "did the player do anything this frame?" from legacy `UnityEngine.Input` plus character-movement fallback. Pure poller, no Unity component. | Own |
+| `DayTimeBlock.cs` | 106 | The **one** place that touches the game clock: adds/removes our id in `DayProgresser`'s `Blocker`, and reads whether anyone else holds it. Static facade over the game mechanism. | Own |
+| `Safe.cs` | 48 | Cross-cutting guard helper: `Safe.Get`/`Safe.Do` run a Unity/game call that might throw, turning a throw into a fallback (or a logged warning). Names the guard shape once for the mod's own code. | Own |
 | `PassOutGuard.cs` | 82 | The Harmony postfix on `GameDefaultState.IsPassOutNeeded` that refuses the 2am collapse during the split-second end-of-day race. | Own |
 | `PauseBadge.cs` | 203 | The "Time paused — away" badge: builds its own canvas, positions/sizes it, formats the caption. `MonoBehaviour` owned by `AfkWatcher`. | Own |
 | `GameFonts.cs` | 178 | Locates the game's Gelica font + outline material from loaded assets. | **Vendored** |
@@ -72,6 +73,11 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   uses `IsHeldByAnyoneElse`). Removed with its doc comment.
 - **M5 — `DayTimeBlock.BlockerId` tightened `internal` → `private`.** Referenced only inside
   `DayTimeBlock`; the exposure leaked implementation surface.
+- **A1 — Repeated `try/catch` guard shape named as `Safe` (new `src/Safe.cs`).** The "call a
+  Unity/game API that might throw; fall back / log" shape (six own-code sites across `ActivityMonitor`
+  and `DayTimeBlock`) now goes through `Safe.Get<T>` (silent fallback) / `Safe.Do` (logged). Vendored
+  files keep their own guards to stay verbatim-synced. Behaviour-preserving; `PlayerMoved`'s bespoke
+  guard (mutates state in the catch) was deliberately left inline.
 
 **Open (backlogged):**
 
@@ -100,12 +106,6 @@ tracked in [docs/BACKLOG.md](docs/BACKLOG.md).
   instead of referencing them, defeating the palette's "colours in one place" boundary (and this is
   why those two palette fields read as unused under C3). Fix is cheap but must land in **both** vendored
   copies together to preserve the verbatim-sync invariant — hence coordinated, not a unilateral edit.
-
-- **A1 — Repeated `try/catch` guard shape (P2).** Six sites across `ActivityMonitor` (the `Safe*`
-  wrappers) and `DayTimeBlock` repeat "call external API; on exception return fallback / log warning."
-  A thin `Safe.Get<T>(func, fallback)` / `Safe.Do(action, warn)` helper would name the concept —
-  **not** premature (6+ sites, 2 files), but must carry per-site log messages (some log, some are
-  silent), so keep it two overloads, not one shape. Low urgency; each site already reads clearly.
 
 - **D1 (M2) — Pause ownership represented three ways (P2, behaviour-sensitive).** `AfkWatcher.armed`,
   the static `AfkWatcher.IsPaused`, and `DayTimeBlock.held` all encode "are we holding the clock?".

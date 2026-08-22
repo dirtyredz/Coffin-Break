@@ -1,4 +1,3 @@
-using System;
 using Chicken.Utilities;
 
 namespace CoffinBreak
@@ -41,35 +40,26 @@ namespace CoffinBreak
         /// does not gate <see cref="Hold"/>: staying held means that when the menu closes there
         /// is no frame in which the clock is free while the player is still away.
         /// </summary>
-        internal static bool IsHeldByAnyoneElse
+        internal static bool IsHeldByAnyoneElse => Safe.Get(() =>
         {
-            get
+            // Never let this cosmetic question break the badge, let alone the Update loop:
+            // Safe.Get returns false on any throw.
+            var blocker = Blocker.Get(GameBlockerId);
+            if (blocker == null)
             {
-                try
-                {
-                    var blocker = Blocker.Get(GameBlockerId);
-                    if (blocker == null)
-                    {
-                        return false;
-                    }
+                return false;
+            }
 
-                    foreach (var id in blocker.Ids)
-                    {
-                        if (id != BlockerId)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
-                catch (Exception)
+            foreach (var id in blocker.Ids)
+            {
+                if (id != BlockerId)
                 {
-                    // Never let a cosmetic question break the badge, let alone the Update loop.
-                    return false;
+                    return true;
                 }
             }
-        }
+
+            return false;
+        }, false);
 
         internal static void Hold()
         {
@@ -78,7 +68,7 @@ namespace CoffinBreak
                 return;
             }
 
-            try
+            Safe.Do(() =>
             {
                 // Not MonoBehaviourSingleton<T>.Instance directly: that can construct on access
                 // in some singleton implementations, and there is nothing to block before the
@@ -90,11 +80,7 @@ namespace CoffinBreak
 
                 MonoBehaviourSingleton<DayProgresser>.Instance.AddDayTimeBlocker(BlockerId);
                 held = true;
-            }
-            catch (Exception e)
-            {
-                CoffinBreakPlugin.Log.LogWarning($"Could not stop the clock: {e.Message}");
-            }
+            }, "Could not stop the clock");
         }
 
         internal static void Release()
@@ -108,17 +94,13 @@ namespace CoffinBreak
             // a blocker we cannot remove, because every later Release would then no-op.
             held = false;
 
-            try
+            Safe.Do(() =>
             {
                 if (MonoBehaviourSingleton<DayProgresser>.Exists)
                 {
                     MonoBehaviourSingleton<DayProgresser>.Instance.RemoveDayTimeBlocker(BlockerId);
                 }
-            }
-            catch (Exception e)
-            {
-                CoffinBreakPlugin.Log.LogWarning($"Could not restart the clock: {e.Message}");
-            }
+            }, "Could not restart the clock");
         }
     }
 }
