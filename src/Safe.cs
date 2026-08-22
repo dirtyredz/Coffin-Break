@@ -35,6 +35,9 @@ namespace CoffinBreak
         /// <summary>
         /// Run <paramref name="op"/>; if it throws, log "<paramref name="warning"/>: {message}"
         /// instead of propagating. For actions where a failure is worth a line in the log.
+        ///
+        /// Note: a bare <c>return;</c> inside <paramref name="op"/> exits the lambda, not the calling
+        /// method — safe only while nothing follows the <see cref="Do"/> call in that caller.
         /// </summary>
         internal static void Do(Action op, string warning)
         {
