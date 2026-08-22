@@ -19,7 +19,7 @@ namespace CoffinBreak
     internal static class DayTimeBlock
     {
         /// <summary>Namespaced so it cannot collide with another mod's id.</summary>
-        internal const string BlockerId = "com.dirtyredz.coffinbreak";
+        private const string BlockerId = "com.dirtyredz.coffinbreak";
 
         /// <summary>
         /// The name <see cref="DayProgresser"/> gives its own blocker, from its field
@@ -32,26 +32,6 @@ namespace CoffinBreak
 
         /// <summary>True while this mod is the reason (or a reason) the clock is stopped.</summary>
         internal static bool IsHeld => held;
-
-        /// <summary>
-        /// True when the clock is stopped by anyone — us, the pause menu, another mod. Used to
-        /// keep the badge honest rather than to make decisions.
-        /// </summary>
-        internal static bool IsClockStopped
-        {
-            get
-            {
-                try
-                {
-                    var progresser = MonoBehaviourSingleton<DayProgresser>.Instance;
-                    return progresser != null && progresser.IsDayProgressionPaused;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
-        }
 
         /// <summary>
         /// True when something other than this mod is also holding the clock — the pause menu,
