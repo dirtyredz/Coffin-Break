@@ -15,11 +15,11 @@ All source is under `src/`. One responsibility per file:
 |------|------:|----------------|------|
 | `Plugin.cs` | 49 | BepInEx entry point: calls `CoffinBreakConfig.Bind`, wires the Harmony patch + `AfkWatcher`, releases the clock on unload, owns the shared `Log`. Lifecycle/wiring only. | Own |
 | `CoffinBreakConfig.cs` | 143 | The configuration schema and bound values: all 13 `ConfigEntry` fields, the `BadgeCorner` enum, section labels, and `Bind(ConfigFile)`. Consumers depend on this, not on the entry class. | Own |
-| `AfkWatcher.cs` | 181 | The state machine — *idle in, active out*. A `MonoBehaviour` on the plugin's GameObject that arms/disarms the hold based on idle time, focus loss and cutscene state. Owns `IsPaused`. | Own |
+| `AfkWatcher.cs` | 171 | The state machine — *idle in, active out*. A `MonoBehaviour` on the plugin's GameObject that arms/disarms the hold based on idle time, focus loss and cutscene state. Owns `IsPaused`. | Own |
 | `ActivityMonitor.cs` | 144 | Answers "did the player do anything this frame?" from legacy `UnityEngine.Input` plus character-movement fallback. Pure poller, no Unity component. | Own |
-| `DayTimeBlock.cs` | 106 | The **one** place that touches the game clock: adds/removes our id in `DayProgresser`'s `Blocker`, and reads whether anyone else holds it. Static facade over the game mechanism. | Own |
-| `Safe.cs` | 48 | Cross-cutting guard helper: `Safe.Get`/`Safe.Do` run a Unity/game call that might throw, turning a throw into a fallback (or a logged warning). Names the guard shape once for the mod's own code. | Own |
-| `PassOutGuard.cs` | 82 | The Harmony postfix on `GameDefaultState.IsPassOutNeeded` that refuses the 2am collapse during the split-second end-of-day race. | Own |
+| `DayTimeBlock.cs` | 108 | The **one** place that touches the game clock: adds/removes our id in `DayProgresser`'s `Blocker`, and reads whether anyone else holds it. Static facade over the game mechanism. | Own |
+| `Safe.cs` | 54 | Cross-cutting guard helper: `Safe.Get`/`Safe.Do` run a Unity/game call that might throw, turning a throw into a fallback (or a logged warning). Names the guard shape once for the mod's own code. | Own |
+| `PassOutGuard.cs` | 77 | The Harmony postfix on `GameDefaultState.IsPassOutNeeded` that refuses the 2am collapse during the split-second end-of-day race. | Own |
 | `PauseBadge.cs` | 203 | The "Time paused — away" badge: builds its own canvas, positions/sizes it, formats the caption. `MonoBehaviour` owned by `AfkWatcher`. | Own |
 | `GameFonts.cs` | 178 | Locates the game's Gelica font + outline material from loaded assets. | **Vendored** |
 | `GamePalette.cs` | 40 | The game's UI colours in one place. | **Vendored** |
@@ -32,7 +32,7 @@ say "fix bugs in both copies." See [Structural debt](#structural-debt) and
 ## Dependency shape
 
 ```
-Plugin (entry, config, wiring)
+Plugin (entry, wiring)  ── Awake ──▶ CoffinBreakConfig.Bind   (the config schema; everyone reads it)
   ├─ PassOutGuard.Apply(harmony)        → reads AfkWatcher.IsPaused + config
   ├─ AddComponent<AfkWatcher>()
   │     ├─ new ActivityMonitor()        → reads config

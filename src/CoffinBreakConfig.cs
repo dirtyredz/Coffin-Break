@@ -16,7 +16,7 @@ namespace CoffinBreak
     internal static class CoffinBreakConfig
     {
         /// <summary>Where the paused badge sits on screen.</summary>
-        public enum BadgeCorner
+        internal enum BadgeCorner
         {
             TopCentre,
             TopLeft,

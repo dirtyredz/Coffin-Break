@@ -10,7 +10,7 @@ Non-obvious traps. Read before changing the flagged areas.
   `src/PanelSprite.cs` are copied from `mods/ChestLabels` and their headers say "fix bugs in both
   copies." Do **not** edit one in isolation (including the tempting M1 fix of replacing `PanelSprite`'s
   literals with `GamePalette` references) — it must land in both copies together or the sync invariant
-  breaks. See STRUCTURE.md debt C1/M1.
+  breaks. See STRUCTURE.md debt C2/M1.
 
 - **Never freeze the clock during a cutscene.** The game's scripted waits run on day progression
   (`DayProgresser.WaitForSeconds` spins while `IsDayProgressionPaused`). Holding the clock mid-cutscene
