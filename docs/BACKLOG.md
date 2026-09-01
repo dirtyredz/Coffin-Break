@@ -56,3 +56,13 @@ _None._
   still lose the day. Mitigated by the default (on). *Working as designed; documented in README.*
 - **Not a substitute for pausing.** Protects the day only; does not stop a hostile encounter or a
   timed quest with its own clock. *By design.*
+
+## Placement follow-up (from the 2026-09-01 structure review)
+
+- **P2 — `core/ActivityMonitor.cs` reads the live game without insulation.** `PlayerMoved()` reads
+  `MonoBehaviourSingleton<PlayerView>.Instance.transform.position` directly and imports
+  `Chicken.Utilities`. `game/DayTimeBlock.cs` exists precisely to insulate the mod from a game API;
+  `ActivityMonitor` gets no equivalent, so a file classified as game-agnostic breaks if that
+  singleton changes. Either route the read through a small `game/` bridge, or move the file. The
+  `game/` bullet has been reworded to a primary-responsibility test so the docs no longer contradict
+  the placement, but the underlying coupling is still real.

@@ -38,7 +38,9 @@ CoffinBreak/
 
 **Enforced homes:**
 
-- `src/game/` — Harmony patches and live-game bridges: anything that reads or intercepts the running game
+- `src/game/` — Harmony patches and live-game bridges: anything whose PRIMARY responsibility is
+  reading or intercepting the running game. (Primary, not "any": `core/ActivityMonitor.cs` makes one
+  guarded `PlayerView` read as a fallback and is otherwise the mod's own input polling.)
 - `src/ui/` — panels, widgets, presenters, views and runtime-generated sprites
 - `src/core/` — the mod's own domain logic, state, config, input polling and diagnostics
 - `src/Plugin.cs` — the BepInEx entry point; must sit beside the `.csproj` at the `src/` root
