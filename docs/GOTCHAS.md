@@ -6,8 +6,8 @@ Non-obvious traps. Read before changing the flagged areas.
   wins the bare-name lookup. `ActivityMonitor` fully-qualifies every call for this reason. A bare
   `Input.anyKey` will bind to the wrong type.
 
-- **The vendored trio must stay verbatim.** `src/GameFonts.cs`, `src/GamePalette.cs`,
-  `src/PanelSprite.cs` are copied from `mods/ChestLabels` and their headers say "fix bugs in both
+- **The vendored trio must stay verbatim.** `src/game/GameFonts.cs`, `src/game/GamePalette.cs`,
+  `src/ui/PanelSprite.cs` are copied from `mods/ChestLabels` and their headers say "fix bugs in both
   copies." Do **not** edit one in isolation (including the tempting M1 fix of replacing `PanelSprite`'s
   literals with `GamePalette` references) — it must land in both copies together or the sync invariant
   breaks. See STRUCTURE.md debt C2/M1.
@@ -25,7 +25,7 @@ Non-obvious traps. Read before changing the flagged areas.
 
 - **External calls are wrapped on purpose.** Unity throws (not returns default) when a platform lacks a
   device, and singletons can be absent before the game is up. The mod's own code routes these calls
-  through `Safe.Get`/`Safe.Do` (`src/Safe.cs`); a throwing idle check would otherwise take the whole
+  through `Safe.Get`/`Safe.Do` (`src/core/Safe.cs`); a throwing idle check would otherwise take the whole
   `Update` loop down. `ActivityMonitor.PlayerMoved` keeps a bespoke inline guard (it mutates
   `hasPlayerPosition` in the catch) — don't fold it into `Safe`. Vendored files keep their own guards.
 
