@@ -40,3 +40,9 @@ Non-obvious traps. Read before changing the flagged areas.
 - **`PauseBadge.Build()` sets `built = true` unconditionally**, so the `if (!built) return;` right after
   it never fires today (STRUCTURE.md debt M4). It's kept as defensive scaffolding for a future fallible
   `Build()`; don't mistake it for reachable error handling.
+
+- **Residual window with `BlockPassOutWhilePaused` off.** Going idle within `IdleSeconds` of 2am can
+  still lose the day. Mitigated by the default (on). *Working as designed; documented in README.*
+
+- **Not a substitute for pausing.** Protects the day only; does not stop a hostile encounter or a
+  timed quest with its own clock. *By design.*

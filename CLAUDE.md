@@ -43,3 +43,10 @@ Auto-deploys the DLL to `BepInEx/plugins/MoonlightPeaksMods/CoffinBreak/`. Pack 
 This repo is gated (pre-push hook, installed 2026-08-22). Edit/debug freely; the review fires once at
 **push** on the accumulated change, not per edit. Commit at logical boundaries; Claude runs the review
 and pushes (asking first) when work is ready. `/gate status` shows what's pending.
+
+## Work items (Docket)
+
+Track work in `docs/items/` through `dk`. Use filtered `dk list --json` and `dk show`; use `add`, `set`,
+and `link` for changes. Never invent IDs or ranks. Claim work in the current worktree, release it when
+finished, and run `dk check` before pushing. Drop items instead of deleting them. Living docs remain
+ordinary Markdown.
